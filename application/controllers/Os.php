@@ -434,7 +434,28 @@ class Os extends CI_Controller {
         }
 
     }
+	
+    public function adicionarTecnico(){
 
+        
+        $data = array(
+			// variavel do banco recebendo o valor do input
+            'tecnico'=> $this->input->post('idTecnico'),
+            'idOs'=> $this->input->post('idOsServico'),
+			'data'=> date('Y-m-d', strtotime($this->input->post('dataServico'))),
+			//'nomeCliente'=> $this->input->post('clientes_id'),
+			'dtevento'=> date('d-m-Y', strtotime($this->input->post('dataServico'))),
+        );
+
+        if($this->os_model->add('agenda_os', $data) == true){
+
+            echo json_encode(array('result'=> true));
+        }else{
+            echo json_encode(array('result'=> false));
+        }
+
+    }
+	
     function excluirServico(){
             $ID = $this->input->post('idServico');
             if($this->os_model->delete('servicos_os','idServicos_os',$ID) == true){
@@ -446,7 +467,17 @@ class Os extends CI_Controller {
             }
     }
 
+	function excluirAgenda(){
+            $ID = $this->input->post('idTecnico');
+            if($this->os_model->delete('agenda_os','id',$ID) == true){
 
+                echo json_encode(array('result'=> true));
+            }
+            else{
+                echo json_encode(array('result'=> false));
+            }
+    }
+	
     public function anexar(){
 
         $this->load->library('upload');
