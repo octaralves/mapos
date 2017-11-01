@@ -19,6 +19,7 @@
                         <li class="active" id="tabDetalhes"><a href="#tab1" data-toggle="tab">Detalhes da OS</a></li>
                         <li id="tabProdutos"><a href="#tab2" data-toggle="tab">Produtos</a></li>
                         <li id="tabServicos"><a href="#tab3" data-toggle="tab">Serviços</a></li>
+                        <li id="tabAgenda"><a href="#tab5" data-toggle="tab">Agenda</a></li>
                         <li id="tabAnexos"><a href="#tab4" data-toggle="tab">Anexos</a></li>
                     </ul>
                     <div class="tab-content">
@@ -265,7 +266,62 @@
                             </div>
                         </div>
                 
-
+                        <!--Agenda de horarios tecnico-->
+                        <div class="tab-pane" id="tab5">
+                            <div class="span12" style="padding: 1%; margin-left: 0">
+                                <div class="span12 well" style="padding: 1%; margin-left: 0">
+                                    <form id="formTecnico" action="<?php echo base_url() ?>index.php/os/adicionarTecnico" method="post">
+                                    <div class="span10">
+										
+                                        <input type="hidden" name="idTecnico" id="idTecnico" placeholder="Código"  />
+                                        <input type="hidden" name="idOsServico" id="idOsServico" value="<?php echo $result->idOs?>" />                                      
+                                        <label for="">Técnico</label>
+                                        <input type="text" class="span12" name="tecnicoAgenda" id="tecnicoAgenda" placeholder="Digite o nome do técnico" />
+										<label for="tecnicoAgenda">Agendar data<span class="required">*</span></label>
+										<input type="date" name="dataServico" id="dataServico" value="" />
+                                    </div>
+									
+                                    <div class="span2">
+                                        <label for="" style="color:white;" >Adicionar</label>
+                                        <button class="btn btn-success span12"><i class="icon-white icon-plus"></i> Adicionar</button>
+                                    </div>
+                                    </form>
+                                </div>
+                                <div class="span12" id="divAgenda" style="margin-left: 0">
+                                    <table class="table table-bordered ">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 65px;">Tecnico</th>
+                                                <th style="width: 65px;">Data</th>
+                                                <th style="width: 65px;">Saida</th>
+                                                <th style="width: 65px;">Hora de chegada</th>
+                                                <th style="width: 65px;">Ação</th>
+											</tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+												//$total = 0;
+												//var_dump ($agenda_os);
+												foreach ($agenda_os as $a) {
+													if ($a->horaSaida)
+														echo '<tr class="success">';
+													else
+													echo '<tr>';
+														echo '<td>'.$a->tecnico.'</td>';
+														echo '<td>'.date('d/m/Y', strtotime($a->data)).'</td>';
+														echo '<td>'.$a->horaSaida.'</td>';
+														echo '<td>'.$a->horaChegada.'</td>';
+														echo '<td> <p idAcao="'.$a->id.'" title="Excluir Horário" class="btn btn-danger"> <i class="icon-trash icon-white"></i> </p> </td>';
+													echo '</tr >';
+												}?>
+                                        </tbody>										
+                                    </table>
+									<?php
+											echo '<hr style="height:1px; border:none; color:#000; background-color:#000; margin-top: 0px; margin-bottom: 0px;"/>';
+										?>
+                                </div>
+                            </div>
+                        </div>
 
                     </div>
 
@@ -496,6 +552,17 @@ $(document).ready(function(){
             }
       });
 
+        
+	  $("#tecnicoAgenda").autocomplete({
+            source: "<?php echo base_url(); ?>index.php/os/autoCompleteUsuario",
+            minLength: 2,
+            select: function( event, ui ) {
+
+                $("#idTecnico").val(ui.item.id);
+				$("#dataServico").val(ui.item.id).focus();
+
+            }
+      });
 
 
 
@@ -599,6 +666,41 @@ $(document).ready(function(){
 
        });
 
+        $("#formTecnico").validate({
+					rules:{
+						dataServico: {required:true},
+						tecnicoAgenda: {required:true}
+					},
+					messages:{
+						dataServico: {required: 'Agende uma data'},
+						tecnicoAgenda: {required: 'Insira um Técnico '}
+					},
+					submitHandler: function( form ){       
+						var dados = $( form ).serialize();
+						
+						$("#divAgenda").html("<div class='progress progress-info progress-striped active'><div class='bar' style='width: 100%'></div></div>");
+						$.ajax({
+							type: "POST",
+							url: "<?php echo base_url();?>index.php/os/adicionarTecnico",
+							data: dados,
+							dataType: 'json',
+							success: function(data)
+							{
+								if(data.result == true){
+									$("#divAgenda" ).load("<?php echo current_url();?> #divAgenda" );
+									$("#dataServico").val('');
+									$("#tecnicoAgenda").val('').focus();
+								}
+								else{
+									alert('Ocorreu um erro ao tentar adicionar o tecnico.');
+								}
+							}
+						});
+						
+						return false;
+					}
+					
+				});
 
         $("#formAnexos").validate({
          
