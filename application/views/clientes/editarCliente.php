@@ -16,13 +16,13 @@
                         <?php echo form_hidden('idClientes',$result->idClientes) ?>
                         <label for="nomeCliente" class="control-label">Nome<span class="required">*</span></label>
                         <div class="controls">
-                            <input id="nomeCliente" type="text" name="nomeCliente" value="<?php echo $result->nomeCliente; ?>"  />
+                            <input id="nomeCliente" type="text" name="nomeCliente" autocomplete="off"  onkeyup="maiuscula(this)" value="<?php echo $result->nomeCliente; ?>"  />
                         </div>
                     </div>
                     <div class="control-group">
                         <label for="documento" class="control-label">CPF/CNPJ<span class="required">*</span></label>
                         <div class="controls">
-                            <input id="documento" type="text" name="documento" value="<?php echo $result->documento; ?>"  />
+                            <input onchange="javascript: if((validarCPF()==false) && (validarCNPJ()==false)) alert('incorreto');" id="documento" type="number" name="documento" value="<?php echo $result->documento; ?>"  />
                         </div>
                     </div>
                     <div class="control-group">
@@ -42,14 +42,14 @@
                     <div class="control-group">
                         <label for="email" class="control-label">Email<span class="required">*</span></label>
                         <div class="controls">
-                            <input id="email" type="text" name="email" value="<?php echo $result->email; ?>"  />
+                            <input id="email" type="text" name="email" onkeyup="menuscula(this)" value="<?php echo $result->email; ?>"  />
                         </div>
                     </div>
 
                     <div class="control-group" class="control-label">
                         <label for="rua" class="control-label">Rua<span class="required">*</span></label>
                         <div class="controls">
-                            <input id="rua" type="text" name="rua" value="<?php echo $result->rua; ?>"  />
+                            <input id="rua" type="text" name="rua" autocomplete="off" onkeyup="maiuscula(this)" value="<?php echo $result->rua; ?>"  />
                         </div>
                     </div>
 
@@ -63,21 +63,21 @@
                     <div class="control-group" class="control-label">
                         <label for="bairro" class="control-label">Bairro<span class="required">*</span></label>
                         <div class="controls">
-                            <input id="bairro" type="text" name="bairro" value="<?php echo $result->bairro; ?>"  />
+                            <input id="bairro" type="text" name="bairro" autocomplete="off" onkeyup="maiuscula(this)" value="<?php echo $result->bairro; ?>"  />
                         </div>
                     </div>
 
                     <div class="control-group" class="control-label">
                         <label for="cidade" class="control-label">Cidade<span class="required">*</span></label>
                         <div class="controls">
-                            <input id="cidade" type="text" name="cidade" value="<?php echo $result->cidade; ?>"  />
+                            <input id="cidade" type="text" name="cidade" autocomplete="off" onkeyup="maiuscula(this)" value="<?php echo $result->cidade; ?>"  />
                         </div>
                     </div>
 
                     <div class="control-group" class="control-label">
                         <label for="estado" class="control-label">Estado<span class="required">*</span></label>
                         <div class="controls">
-                            <input id="estado" type="text" name="estado" value="<?php echo $result->estado; ?>"  />
+                            <input id="estado" type="text" name="estado" autocomplete="off" onkeyup="maiuscula(this)" value="<?php echo $result->estado; ?>"  />
                         </div>
                     </div>
 
@@ -147,5 +147,98 @@
             }
            });
       });
+    	function maiuscula(z){
+        v = z.value.toUpperCase();
+        z.value = v;
+    }
+	function menuscula(z){
+        v = z.value.toLowerCase();
+        z.value = v;
+    }
+	
+	function validarCPF(documento) {
+		//alert(documento);
+		var x = document.getElementById("documento");
+		documento = x.value;
+		
+		var Soma;
+		var Resto;
+		Soma = 0;
+		if (documento == "00000000000") return false;
+		
+		for (i=1; i<=9; i++) Soma = Soma + parseInt(documento.substring(i-1, i)) * (11 - i);
+		Resto = (Soma * 10) % 11;
+		
+		if ((Resto == 10) || (Resto == 11))  Resto = 0;
+		if (Resto != parseInt(documento.substring(9, 10)) ) return false;
+		
+		Soma = 0;
+		for (i = 1; i <= 10; i++) Soma = Soma + parseInt(documento.substring(i-1, i)) * (12 - i);
+		Resto = (Soma * 10) % 11;
+		
+		if ((Resto == 10) || (Resto == 11))  Resto = 0;
+		if (Resto != parseInt(documento.substring(10, 11) ) ) return false;
+		return true;
+		
+	}
+
+	function validarCNPJ(documento) {
+		
+		var x = document.getElementById("documento");
+		documento = x.value;
+		//alert(document.getElementById("documento").value);
+		//eliminamos todos os caracteres não númericos do CNPJ passado como parâmetro
+		documento = documento.replace(/[^\d]+/g,'');
+	 
+		if(documento == '') return false;
+		 
+		if (documento.length != 14)
+			return false;
+	 
+		// Elimina CNPJs invalidos conhecidos
+		if (documento == "00000000000000" || 
+			documento == "11111111111111" || 
+			documento == "22222222222222" || 
+			documento == "33333333333333" || 
+			documento == "44444444444444" || 
+			documento == "55555555555555" || 
+			documento == "66666666666666" || 
+			documento == "77777777777777" || 
+			documento == "88888888888888" || 
+			documento == "99999999999999")
+			return false;
+			 
+		// Valida DVs
+		tamanho = documento.length - 2
+		numeros = documento.substring(0,tamanho);
+		digitos = documento.substring(tamanho);
+		soma = 0;
+		pos = tamanho - 7;
+		for (i = tamanho; i >= 1; i--) {
+		  soma += numeros.charAt(tamanho - i) * pos--;
+		  if (pos < 2)
+				pos = 9;
+		}
+		resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+		if (resultado != digitos.charAt(0))
+			return false;
+			 
+		tamanho = tamanho + 1;
+		numeros = documento.substring(0,tamanho);
+		soma = 0;
+		pos = tamanho - 7;
+		for (i = tamanho; i >= 1; i--) {
+		  soma += numeros.charAt(tamanho - i) * pos--;
+		  if (pos < 2)
+				pos = 9;
+		}
+		resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+		if (resultado != digitos.charAt(1))
+			  return false;
+			   
+		return true;
+    
+	}
+
 </script>
 
